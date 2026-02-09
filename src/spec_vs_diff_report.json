@@ -1,0 +1,61 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-09T15:18:35.796Z",
+  "summary": "Frontend adds an /admin route, admin-related React Query hooks, and a profile-menu entry gated by an isCallerAdmin query. Backend adds a new optional customization settings field with a migration stub, but the diff summary does not show the required backend admin-login/logout APIs nor the read/write customization settings APIs, and the AdminPage UI is truncated before showing the actual settings editor/logout controls.",
+  "missing_requirements": [
+    {
+      "id": "REQ-13",
+      "requirement": "Backend support for credential-based admin login/logout using exact credentials and granting/revoking admin permissions for the caller principal; invalid credentials must fail; existing admin-only ops must accept newly logged-in admins.",
+      "reason": "Frontend calls actor.loginAdmin/actor.logoutAdmin/actor.isCallerAdmin, but the diff summary for backend/main.mo does not show any corresponding methods or the credential check/grant/revoke logic being implemented.",
+      "evidence": [
+        "frontend/src/hooks/useAdmin.ts",
+        "backend/main.mo (truncated; no loginAdmin/logoutAdmin/isCallerAdmin shown)"
+      ]
+    },
+    {
+      "id": "REQ-14",
+      "requirement": "Backend APIs and persistent state for app customization settings: typed settings with defaults; public query fetch; admin-only update that denies non-admin; persistence across upgrades.",
+      "reason": "State/migration for appCustomizationSettings exists, but the diff summary does not show any public query API (e.g., getCustomizationSettings) or admin-only update API (e.g., saveCustomizationSettings), nor any admin gating around such updates.",
+      "evidence": [
+        "backend/main.mo (adds var appCustomizationSettings : ?CustomizationSettings = null; but no APIs shown in truncated excerpt)",
+        "backend/migration_types.mo",
+        "backend/migration.mo",
+        "frontend/src/hooks/useCustomizationSettings.ts (calls actor.getCustomizationSettings() and actor.saveCustomizationSettings())"
+      ]
+    },
+    {
+      "id": "REQ-16",
+      "requirement": "Admin Panel UI to view/update AppSettings with React Query + English toasts; editable fields; saving triggers mutation; success refreshes query; failure shows error and does not indicate success.",
+      "reason": "React Query hooks and toasts exist, but the AdminPage content is truncated before showing the settings edit form, save action wiring, and the authorized/unauthorized handling on the UI side.",
+      "evidence": [
+        "frontend/src/hooks/useCustomizationSettings.ts",
+        "frontend/src/pages/AdminPage.tsx (truncated before showing admin panel contents/customization controls)"
+      ]
+    }
+  ],
+  "hallucinated_features": [
+    {
+      "description": "Customization settings are implemented as theme/primaryColor/logoUrl under the name CustomizationSettings/appCustomizationSettings instead of an AppSettings record with suggested fields like display name/tagline.",
+      "reason": "The BuildRequest asks for a typed AppSettings record (example fields: app display name and tagline). The diff introduces a different settings shape and naming without any evidence of display name/tagline fields.",
+      "evidence": [
+        "backend/main.mo",
+        "backend/migration_types.mo",
+        "frontend/src/hooks/useCustomizationSettings.ts"
+      ]
+    }
+  ],
+  "confidence": 0.74,
+  "changed_files": [
+    "backend/main.mo",
+    "backend/migration.mo",
+    "backend/migration_types.mo",
+    "frontend-file-summaries.txt",
+    "frontend/src/App.tsx",
+    "frontend/src/components/ProfileMenu.tsx",
+    "frontend/src/hooks/useAdmin.ts",
+    "frontend/src/hooks/useCustomizationSettings.ts",
+    "frontend/src/pages/AdminPage.tsx",
+    "project_state.json"
+  ]
+}

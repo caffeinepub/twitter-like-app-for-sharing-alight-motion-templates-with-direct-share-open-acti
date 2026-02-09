@@ -1,0 +1,178 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 7,
+  "summary": "Create an app for sharing Alight Motion templates with a Twitter-like interface and a share button that sends templates directly to Alight Motion.",
+  "architectural_notes": [
+    "Admin panel requires authenticated access; do not hardcode credentials in client code—store securely (e.g., backend/secret config) and use a proper auth mechanism."
+  ],
+  "known_issues": [],
+  "isFixRequest": false,
+  "existing_features": [
+    {
+      "id": "feature-create-a-twitter-like-react-ui-for-browsing-alight-motion-templates-a-main-feed-of-template-posts-a-post-detail-view-and-a-compose-flow-to-publish-a-new-template-post",
+      "title": "Create a Twitter-like React UI for browsing Alight Motion templates: a main feed of template posts, a post detail view, and a compose flow to publish a new template post.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-internet-identity-sign-in-on-the-frontend-and-gate-template-posting-and-any-user-specific-actions-like-like-repost-behind-authentication",
+      "title": "Implement Internet Identity sign-in on the frontend and gate template posting (and any user-specific actions like like/repost) behind authentication.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-wire-the-frontend-to-the-backend-using-react-query-for-fetching-the-feed-post-details-and-mutations-create-like-repost",
+      "title": "Wire the frontend to the backend using React Query for fetching the feed, post details, and mutations (create, like, repost).",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-share-to-alight-motion-button-on-each-template-post-that-performs-a-direct-share-open-flow-using-the-post-s-templatelink-e-g-deep-link-or-fallback-to-copying-the-link-and-opening-it",
+      "title": "Add a 'Share to Alight Motion' button on each template post that performs a direct share/open flow using the post's templateLink (e.g., deep link or fallback to copying the link and opening it).",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-apply-a-coherent-visual-theme-colors-typography-spacing-and-component-styling-consistently-across-the-app-with-a-distinct-style-appropriate-for-a-social-feed-without-using-a-blue-purple-primary-palette",
+      "title": "Apply a coherent visual theme (colors, typography, spacing, and component styling) consistently across the app with a distinct style appropriate for a social feed, without using a blue/purple primary palette.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-generate-and-include-basic-static-brand-visual-assets-used-by-the-ui-logo-and-placeholders-and-render-them-from-frontend-public-assets-generated",
+      "title": "Generate and include basic static brand/visual assets used by the UI (logo and placeholders) and render them from frontend/public/assets/generated.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-react-query-hooks-for-premium-subscription-status-fetch-current-user-subscription-status-and-provide-mutations-to-start-cancel-premium-with-user-facing-toast-notifications-in-english-for-success-and-failure",
+      "title": "Add React Query hooks for premium subscription status: fetch current user subscription status and provide mutations to start/cancel premium, with user-facing toast notifications in English for success and failure.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-new-premium-page-route-that-explains-the-premium-plan-and-provides-authenticated-controls-to-subscribe-cancel-unauthenticated-users-should-see-a-sign-in-call-to-action",
+      "title": "Add a new Premium page/route that explains the Premium plan and provides authenticated controls to subscribe/cancel; unauthenticated users should see a sign-in call to action.",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-expose-premium-status-in-the-signed-in-user-ui-e-g-in-the-profile-dropdown-and-add-a-navigation-entry-to-the-premium-page-from-the-app-header-profile-menu",
+      "title": "Expose premium status in the signed-in user UI (e.g., in the profile dropdown) and add a navigation entry to the Premium page from the app header/profile menu.",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-new-admin-panel-route-in-the-react-app-e-g-admin-that-provides-an-admin-login-screen-using-the-provided-username-password-and-clearly-indicates-whether-the-current-authenticated-user-has-admin-access",
+      "title": "Add a new Admin Panel route in the React app (e.g., /admin) that provides an admin login screen using the provided username/password and clearly indicates whether the current authenticated user has admin access.",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-the-admin-panel-ui-to-view-and-update-the-application-customization-settings-stored-in-the-backend-using-react-query-for-fetching-and-mutations-with-english-toast-notifications-for-success-and-failure",
+      "title": "Build the Admin Panel UI to view and update the application customization settings stored in the backend, using React Query for fetching and mutations, with English toast notifications for success and failure.",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-expose-an-entry-point-to-the-admin-panel-in-the-authenticated-ui-visible-only-when-the-current-user-has-admin-access",
+      "title": "Expose an entry point to the Admin Panel in the authenticated UI, visible only when the current user has admin access.",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Build a Twitter-like app interface for browsing/posting Alight Motion templates",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Add a Share button to send/open a template directly in Alight Motion",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Create Motoko backend data models and APIs to store and serve Alight Motion template posts and basic social actions (like and repost) for the feed.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Add a premium subscription option (paid tier) for users",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Extend the Motoko backend to support a premium subscription status for each user, including a query API for the authenticated caller to read their current subscription status.",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Add backend APIs to let an authenticated user initiate and manage their premium subscription state without integrating third-party payments (e.g., start subscription and cancel subscription), and add an admin-only API to set a user’s subscription status for testing/support.",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Add an admin panel for application customization with admin authentication/login (credentials provided by user)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Add backend support for credential-based admin login using the provided credentials (username: sahil@123, password: 123@sahil), and grant/revoke admin permissions for the authenticated Internet Identity principal upon successful login/logout.",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Implement backend APIs and persistent state for application customization settings that are readable by all users but writable only by admins.",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "Twitter-like app for sharing Alight Motion templates with direct share/open action",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

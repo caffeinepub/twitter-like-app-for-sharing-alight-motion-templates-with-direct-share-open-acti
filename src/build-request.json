@@ -1,0 +1,123 @@
+{
+  "kind": "build_request",
+  "title": "Add admin panel with credential-based admin login and app customization controls",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-13",
+      "text": "Add backend support for credential-based admin login using the provided credentials (username: sahil@123, password: 123@sahil), and grant/revoke admin permissions for the authenticated Internet Identity principal upon successful login/logout.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-4",
+          "msg-7"
+        ],
+        "quotes": [
+          "Generate a admin panel for this application customisation, username sahil@123, password 123@sahil",
+          "123@sahil"
+        ]
+      },
+      "acceptanceCriteria": [
+        "When an authenticated user calls the admin-login API with username \"sahil@123\" and password \"123@sahil\", the caller is granted admin permissions in the canister access control state.",
+        "When invalid credentials are provided, the call fails with an authorization error (no admin privileges granted).",
+        "An admin-logout API exists that removes/revokes admin permissions for the caller.",
+        "Existing admin-only operations (e.g., setUserPremium) accept the newly logged-in admin without requiring any URL secret token initialization."
+      ]
+    },
+    {
+      "id": "REQ-14",
+      "text": "Implement backend APIs and persistent state for application customization settings that are readable by all users but writable only by admins.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "Generate a admin panel for this application customisation, username sahil@123, password 123@sahil"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A typed AppSettings record exists in the backend state (e.g., fields such as app display name and tagline), with sensible defaults so the app works before any admin edits.",
+        "A query API is available for the frontend to fetch current AppSettings without requiring authentication.",
+        "An admin-only update API is available to modify AppSettings, and it traps/denies callers without admin permissions.",
+        "Settings updates persist across canister upgrades using stable storage patterns already used by this project (add migration only if state shape changes require it)."
+      ]
+    },
+    {
+      "id": "REQ-15",
+      "text": "Add a new Admin Panel route in the React app (e.g., /admin) that provides an admin login screen using the provided username/password and clearly indicates whether the current authenticated user has admin access.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4",
+          "msg-7"
+        ],
+        "quotes": [
+          "Generate a admin panel for this application customisation, username sahil@123, password 123@sahil",
+          "123@sahil"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A new /admin route exists and is registered in the TanStack Router route tree.",
+        "If the user is not authenticated with Internet Identity, the /admin page shows a sign-in call-to-action (English text) and blocks admin actions.",
+        "If the user is authenticated but not an admin, the /admin page shows a login form that asks for username and password and calls the backend admin-login API.",
+        "If the user is authenticated and is an admin, the /admin page shows the admin panel contents (customization controls) and an admin logout control.",
+        "All user-facing text shown on the admin page is in English."
+      ]
+    },
+    {
+      "id": "REQ-16",
+      "text": "Build the Admin Panel UI to view and update the application customization settings stored in the backend, using React Query for fetching and mutations, with English toast notifications for success and failure.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "Generate a admin panel for this application customisation, username sahil@123, password 123@sahil"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The admin panel loads current AppSettings via a React Query query and displays the current values in editable form fields.",
+        "Saving changes triggers a React Query mutation to the backend admin-only update API.",
+        "On successful save, a toast notification in English confirms the update and the settings query is refreshed/invalidated.",
+        "On failure (unauthorized or other errors), a toast notification in English explains the action failed and no UI state incorrectly indicates success."
+      ]
+    },
+    {
+      "id": "REQ-17",
+      "text": "Expose an entry point to the Admin Panel in the authenticated UI, visible only when the current user has admin access.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "Generate a admin panel for this application customisation, username sahil@123, password 123@sahil"
+        ]
+      },
+      "acceptanceCriteria": [
+        "When the current user is an admin, the profile dropdown includes a navigational item to /admin labeled in English (e.g., \"Admin Panel\").",
+        "When the current user is not an admin, the admin navigation item is not shown.",
+        "Navigation to /admin works and does not require manual URL editing to access."
+      ]
+    }
+  ],
+  "constraints": [
+    "Backend must remain a single-actor Motoko canister (all logic in backend/main.mo).",
+    "Only generate backend/migration.mo changes if required to preserve existing stable state across upgrades (conditional migration policy).",
+    "Do not edit files in frontend immutablePaths (frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui).",
+    "Use English for all user-facing text (labels, buttons, toasts, empty states, errors).",
+    "Admin credentials must be exactly: username sahil@123, password 123@sahil."
+  ],
+  "nonGoals": [
+    "Implementing third-party authentication providers (only Internet Identity is supported).",
+    "Adding real payment processing for Premium subscriptions.",
+    "Adding external databases or non-IC backend services.",
+    "Building a fully-featured CMS; limit customization to the explicit AppSettings stored in the canister plus admin access management."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

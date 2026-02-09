@@ -1,0 +1,78 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Admin Panel route with admin login and customization settings UI (frontend only)",
+  "requirements": [
+    {
+      "id": "REQ-15",
+      "summary": "Add a new /admin route with an Internet Identity sign-in CTA, credential-based admin login form, and clear admin-access status display.",
+      "acceptanceCriteria": [
+        "A new /admin route exists and is registered in the TanStack Router route tree.",
+        "If the user is not authenticated with Internet Identity, the /admin page shows a sign-in call-to-action (English text) and blocks admin actions.",
+        "If the user is authenticated but not an admin, the /admin page shows a login form that asks for username and password and calls the backend admin-login API.",
+        "If the user is authenticated and is an admin, the /admin page shows the admin panel contents (customization controls) and an admin logout control.",
+        "All user-facing text shown on the admin page is in English."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/AdminPage.tsx",
+          "operation": "create",
+          "description": "Create the Admin Panel page UI for /admin. Use the authorization component’s frontend guidance (role-based access control patterns) to drive the authenticated vs non-authenticated vs admin vs non-admin states; Verify the component's usage instructions before implementing. Show English sign-in CTA when not authenticated, show credential login form when authenticated but not admin, and show admin content + logout control when admin."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Register the new /admin route in the TanStack Router route tree and wire it to the new AdminPage so navigation works without manual URL editing."
+        },
+        {
+          "path": "frontend/src/hooks/useAdmin.ts",
+          "operation": "create",
+          "description": "Add React Query hooks for admin access state and admin auth actions. Use the authorization component’s frontend guidance for handling authenticated principals and authorization failures gracefully; Verify the component's usage instructions before implementing. Include: (1) is-caller-admin query (authenticated-only), (2) admin login mutation calling loginAdmin(username,password), (3) admin logout mutation calling logoutAdmin(), with appropriate cache invalidation."
+        }
+      ]
+    },
+    {
+      "id": "REQ-16",
+      "summary": "Build Admin Panel controls to fetch and update customization settings using React Query, with English toast notifications for success/failure.",
+      "acceptanceCriteria": [
+        "The admin panel loads current AppSettings via a React Query query and displays the current values in editable form fields.",
+        "Saving changes triggers a React Query mutation to the backend admin-only update API.",
+        "On successful save, a toast notification in English confirms the update and the settings query is refreshed/invalidated.",
+        "On failure (unauthorized or other errors), a toast notification in English explains the action failed and no UI state incorrectly indicates success."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useCustomizationSettings.ts",
+          "operation": "create",
+          "description": "Create React Query hooks for customization settings: a query to fetch current settings (getCustomizationSettings) and a mutation to save changes (saveCustomizationSettings). Use the authorization component’s frontend guidance for handling authorization errors from backend traps; Verify the component's usage instructions before implementing. Ensure query invalidation/refetch after successful save."
+        },
+        {
+          "path": "frontend/src/pages/AdminPage.tsx",
+          "operation": "modify",
+          "description": "Implement the editable customization form inside the admin-only view (e.g., theme, primaryColor, logoUrl). Wire it to the customization settings query/mutation via React Query. Add English toast notifications for save success and failure, and ensure failed saves do not leave the UI in an incorrect success state."
+        }
+      ]
+    },
+    {
+      "id": "REQ-17",
+      "summary": "Expose an Admin Panel navigation entry in the authenticated profile dropdown, visible only to admins.",
+      "acceptanceCriteria": [
+        "When the current user is an admin, the profile dropdown includes a navigational item to /admin labeled in English (e.g., \"Admin Panel\").",
+        "When the current user is not an admin, the admin navigation item is not shown.",
+        "Navigation to /admin works and does not require manual URL editing to access."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/ProfileMenu.tsx",
+          "operation": "modify",
+          "description": "Add an admin-only dropdown item labeled in English (\"Admin Panel\") that navigates to /admin. Determine visibility using the is-caller-admin query hook. Use the authorization component’s frontend guidance for access-control UI patterns; Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/hooks/useAdmin.ts",
+          "operation": "modify",
+          "description": "Ensure the admin-status query hook is reusable by ProfileMenu (including appropriate enabled conditions and safe defaults) and that its cache invalidates after admin login/logout so the dropdown visibility updates immediately; Verify the component's usage instructions before implementing."
+        }
+      ]
+    }
+  ]
+}

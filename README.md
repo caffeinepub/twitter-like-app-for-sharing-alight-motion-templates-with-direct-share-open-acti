@@ -1,2 +1,3 @@
-# twitter-like-app-for-sharing-alight-motion-templates-with-direct-share-open-acti
-Exported from Caffeine project: Twitter-like app for sharing Alight Motion templates with direct share/open action
+## 
+
+To run app build and run docker image: `docker build -t app . docker run -it --network host app`
