@@ -19,16 +19,16 @@ export default function AppHeader() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="glass-surface sticky top-0 z-50 w-full border-b border-primary/20">
       <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
         <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
           <img
             src="/assets/generated/am-template-logo.dim_512x512.png"
-            alt="Alight Motion Templates"
+            alt="AM EXPLORE"
             className="h-10 w-10"
           />
           <div className="flex flex-col">
-            <span className="text-lg font-bold leading-none">AM Templates</span>
+            <span className="text-lg font-bold leading-none text-primary">AM EXPLORE</span>
             <span className="text-xs text-muted-foreground">Motion Graphics Hub</span>
           </div>
         </Link>

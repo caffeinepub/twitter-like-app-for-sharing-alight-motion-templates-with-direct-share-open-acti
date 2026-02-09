@@ -2,8 +2,10 @@ import { Link } from '@tanstack/react-router';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Heart, Repeat2, Share2, ExternalLink } from 'lucide-react';
+import { Heart, Repeat2, ExternalLink, Download, Play } from 'lucide-react';
 import { shareToAlightMotion } from '../utils/shareToAlightMotion';
+import { directDownload } from '../utils/directDownload';
+import PostVideo from './PostVideo';
 import type { TemplatePost } from '../types/post';
 
 interface PostCardProps {
@@ -26,13 +28,19 @@ export default function PostCard({ post, onLike, onRepost }: PostCardProps) {
     shareToAlightMotion(post.templateLink, post.title);
   };
 
+  const handleDownload = () => {
+    directDownload(post.templateLink, post.title);
+  };
+
+  const hasVideo = post.videoId && post.videoId > 0n;
+
   return (
-    <Card className="overflow-hidden transition-all hover:shadow-lg">
+    <Card className="glass-surface overflow-hidden transition-all hover:shadow-lg hover:shadow-primary/10 border-primary/20">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
             <Avatar className="h-10 w-10">
-              <AvatarFallback className="bg-accent text-accent-foreground text-sm">{authorInitials}</AvatarFallback>
+              <AvatarFallback className="bg-primary/20 text-primary text-sm">{authorInitials}</AvatarFallback>
             </Avatar>
             <div>
               <p className="font-semibold leading-none">{post.authorName}</p>
@@ -49,7 +57,16 @@ export default function PostCard({ post, onLike, onRepost }: PostCardProps) {
             <p className="text-sm text-muted-foreground line-clamp-2">{post.description}</p>
           </div>
 
-          {post.previewImageUrl ? (
+          {hasVideo ? (
+            <div className="relative">
+              <PostVideo videoId={post.videoId!} className="aspect-video" />
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="bg-black/50 rounded-full p-3 backdrop-blur-sm">
+                  <Play className="h-6 w-6 text-white" />
+                </div>
+              </div>
+            </div>
+          ) : post.previewImageUrl ? (
             <img
               src={post.previewImageUrl}
               alt={post.title}
@@ -66,7 +83,7 @@ export default function PostCard({ post, onLike, onRepost }: PostCardProps) {
           {post.tags && post.tags.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {post.tags.map((tag, idx) => (
-                <span key={idx} className="text-xs bg-accent/50 text-accent-foreground px-2 py-1 rounded-full">
+                <span key={idx} className="text-xs bg-primary/20 text-primary px-2 py-1 rounded-full backdrop-blur-sm">
                   #{tag}
                 </span>
               ))}
@@ -75,7 +92,7 @@ export default function PostCard({ post, onLike, onRepost }: PostCardProps) {
         </CardContent>
       </Link>
 
-      <CardFooter className="pt-3 border-t border-border/50">
+      <CardFooter className="pt-3 border-t border-primary/20">
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-1">
             <Button
@@ -98,10 +115,16 @@ export default function PostCard({ post, onLike, onRepost }: PostCardProps) {
             </Button>
           </div>
 
-          <Button variant="default" size="sm" className="gap-2" onClick={handleShare}>
-            <ExternalLink className="h-4 w-4" />
-            <span className="hidden sm:inline">Open in AM</span>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" className="gap-2" onClick={handleDownload}>
+              <Download className="h-4 w-4" />
+              <span className="hidden sm:inline">Download</span>
+            </Button>
+            <Button variant="default" size="sm" className="gap-2" onClick={handleShare}>
+              <ExternalLink className="h-4 w-4" />
+              <span className="hidden sm:inline">Open in AM</span>
+            </Button>
+          </div>
         </div>
       </CardFooter>
     </Card>

@@ -1,90 +1,116 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T15:18:35.799Z",
+  "generatedAt": "2026-02-09T16:12:34.571Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 5,
-    "implemented": 3,
+    "total": 6,
+    "implemented": 4,
     "items": [
       {
-        "id": "REQ-13",
-        "summary": "Add backend support for credential-based admin login using the provided credentials (username: sahil@123, password: 123@sahil), and grant/revoke admin permissions for the authenticated Internet Identity principal upon successful login/logout.",
+        "id": "REQ-22",
+        "summary": "Extend the post data model to support an optional uploaded video (with audio) attachment, so a post can include either an image preview URL and/or a playable video.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/types/post.ts",
+          "frontend/src/pages/FeedPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/types/post.ts",
+          "frontend/src/pages/FeedPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-23",
+        "summary": "Implement backend APIs to accept a video upload from an authenticated user and to serve the uploaded video back to clients by id.",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-14",
-        "summary": "Implement backend APIs and persistent state for application customization settings that are readable by all users but writable only by admins.",
+        "id": "REQ-24",
+        "summary": "Update the Compose page to include a \"Video\" upload option that lets a signed-in user select a video file (with audio), preview it before posting, and publish the post with the uploaded video attached.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/VideoUploadField.tsx",
+          "frontend/src/pages/ComposePage.tsx",
+          "frontend/src/hooks/useQueries.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/VideoUploadField.tsx",
+          "frontend/src/pages/ComposePage.tsx",
+          "frontend/src/hooks/useQueries.ts"
+        ]
+      },
+      {
+        "id": "REQ-25",
+        "summary": "Render video attachments in the feed post card and post detail page so users can play videos with sound when a post includes a video attachment.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/PostVideo.tsx",
+          "frontend/src/hooks/useVideoFile.ts",
+          "frontend/src/components/PostCard.tsx",
+          "frontend/src/pages/PostDetailPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/PostVideo.tsx",
+          "frontend/src/hooks/useVideoFile.ts",
+          "frontend/src/components/PostCard.tsx",
+          "frontend/src/pages/PostDetailPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-26",
+        "summary": "Add/extend React Query hooks and mutations to support creating posts that include an uploaded video reference, and ensure the feed refreshes after publishing.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/useTemplatePosts.ts",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/FeedPage.tsx",
+          "frontend/src/pages/ComposePage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useTemplatePosts.ts",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/FeedPage.tsx",
+          "frontend/src/pages/ComposePage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-27",
+        "summary": "If adding new persisted backend state for videos changes the actor's stable state shape, add a conditional migration so existing deployments upgrade without losing data.",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
-      },
-      {
-        "id": "REQ-15",
-        "summary": "Add a new Admin Panel route in the React app (e.g., /admin) that provides an admin login screen using the provided username/password and clearly indicates whether the current authenticated user has admin access.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/AdminPage.tsx",
-          "frontend/src/App.tsx",
-          "frontend/src/hooks/useAdmin.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/AdminPage.tsx",
-          "frontend/src/App.tsx",
-          "frontend/src/hooks/useAdmin.ts"
-        ]
-      },
-      {
-        "id": "REQ-16",
-        "summary": "Build the Admin Panel UI to view and update the application customization settings stored in the backend, using React Query for fetching and mutations, with English toast notifications for success and failure.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/hooks/useCustomizationSettings.ts",
-          "frontend/src/pages/AdminPage.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/hooks/useCustomizationSettings.ts",
-          "frontend/src/pages/AdminPage.tsx"
-        ]
-      },
-      {
-        "id": "REQ-17",
-        "summary": "Expose an entry point to the Admin Panel in the authenticated UI, visible only when the current user has admin access.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/ProfileMenu.tsx",
-          "frontend/src/hooks/useAdmin.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/ProfileMenu.tsx",
-          "frontend/src/hooks/useAdmin.ts"
-        ]
       }
     ]
   },
   "changedFiles": [
+    "backend/blob-storage/Mixin.mo",
+    "backend/blob-storage/Storage.mo",
     "backend/main.mo",
-    "backend/migration.mo",
-    "backend/migration_types.mo",
     "build-request.json",
     "caffeine.lock.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/App.tsx",
     "frontend/src/backend.d.ts",
     "frontend/src/backend.ts",
-    "frontend/src/components/ProfileMenu.tsx",
+    "frontend/src/components/PostCard.tsx",
+    "frontend/src/components/PostVideo.tsx",
+    "frontend/src/components/VideoUploadField.tsx",
     "frontend/src/declarations/backend.did.d.ts",
     "frontend/src/declarations/backend.did.js",
-    "frontend/src/hooks/useAdmin.ts",
-    "frontend/src/hooks/useCustomizationSettings.ts",
-    "frontend/src/pages/AdminPage.tsx",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/hooks/useTemplatePosts.ts",
+    "frontend/src/hooks/useVideoFile.ts",
+    "frontend/src/pages/ComposePage.tsx",
+    "frontend/src/pages/FeedPage.tsx",
+    "frontend/src/pages/PostDetailPage.tsx",
+    "frontend/src/types/post.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

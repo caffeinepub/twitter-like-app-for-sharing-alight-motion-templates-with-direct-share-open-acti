@@ -2,9 +2,11 @@ import { useParams, useNavigate } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { ArrowLeft, Heart, Repeat2, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Heart, Repeat2, ExternalLink, Download } from 'lucide-react';
 import { shareToAlightMotion } from '../utils/shareToAlightMotion';
+import { directDownload } from '../utils/directDownload';
 import { useAuthGuard } from '../components/AuthGuard';
+import PostVideo from '../components/PostVideo';
 import { useState } from 'react';
 import type { TemplatePost } from '../types/post';
 
@@ -45,6 +47,10 @@ export default function PostDetailPage() {
     shareToAlightMotion(post.templateLink, post.title);
   };
 
+  const handleDownload = () => {
+    directDownload(post.templateLink, post.title);
+  };
+
   const handleLike = () => {
     requireAuth(() => {
       setPost((prev) => ({
@@ -65,6 +71,8 @@ export default function PostDetailPage() {
     });
   };
 
+  const hasVideo = post.videoId && post.videoId > 0n;
+
   return (
     <div className="py-6 max-w-3xl mx-auto">
       <Button variant="ghost" size="sm" onClick={() => navigate({ to: '/' })} className="mb-4 gap-2">
@@ -72,11 +80,11 @@ export default function PostDetailPage() {
         Back to Feed
       </Button>
 
-      <Card className="overflow-hidden">
+      <Card className="glass-surface overflow-hidden border-primary/20">
         <CardHeader className="pb-4">
           <div className="flex items-center gap-3 mb-4">
             <Avatar className="h-12 w-12">
-              <AvatarFallback className="bg-accent text-accent-foreground">{authorInitials}</AvatarFallback>
+              <AvatarFallback className="bg-primary/20 text-primary">{authorInitials}</AvatarFallback>
             </Avatar>
             <div>
               <p className="font-semibold">{post.authorName}</p>
@@ -88,7 +96,9 @@ export default function PostDetailPage() {
         </CardHeader>
 
         <CardContent className="space-y-4">
-          {post.previewImageUrl ? (
+          {hasVideo ? (
+            <PostVideo videoId={post.videoId!} />
+          ) : post.previewImageUrl ? (
             <img src={post.previewImageUrl} alt={post.title} className="w-full rounded-lg object-cover aspect-video" />
           ) : (
             <img
@@ -103,7 +113,7 @@ export default function PostDetailPage() {
           {post.tags && post.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 pt-2">
               {post.tags.map((tag, idx) => (
-                <span key={idx} className="text-sm bg-accent/50 text-accent-foreground px-3 py-1.5 rounded-full">
+                <span key={idx} className="text-sm bg-primary/20 text-primary px-3 py-1.5 rounded-full backdrop-blur-sm">
                   #{tag}
                 </span>
               ))}
@@ -111,7 +121,7 @@ export default function PostDetailPage() {
           )}
         </CardContent>
 
-        <CardFooter className="flex-col gap-4 pt-4 border-t border-border/50">
+        <CardFooter className="flex-col gap-4 pt-4 border-t border-primary/20">
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-2">
               <Button
@@ -134,10 +144,16 @@ export default function PostDetailPage() {
               </Button>
             </div>
 
-            <Button variant="default" size="default" className="gap-2" onClick={handleShare}>
-              <ExternalLink className="h-5 w-5" />
-              Open in Alight Motion
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="default" className="gap-2" onClick={handleDownload}>
+                <Download className="h-5 w-5" />
+                Download
+              </Button>
+              <Button variant="default" size="default" className="gap-2" onClick={handleShare}>
+                <ExternalLink className="h-5 w-5" />
+                Open in Alight Motion
+              </Button>
+            </div>
           </div>
         </CardFooter>
       </Card>

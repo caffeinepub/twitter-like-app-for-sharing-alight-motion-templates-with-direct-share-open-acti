@@ -8,11 +8,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
+import { useUploadVideo, usePublishTemplatePost } from '../hooks/useQueries';
+import VideoUploadField from '../components/VideoUploadField';
 
 export default function ComposePage() {
   const navigate = useNavigate();
   const { identity } = useInternetIdentity();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const uploadVideoMutation = useUploadVideo();
+  const publishPostMutation = usePublishTemplatePost();
+
+  const [selectedVideo, setSelectedVideo] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -21,6 +27,8 @@ export default function ComposePage() {
     tags: '',
     previewImageUrl: '',
   });
+
+  const isSubmitting = uploadVideoMutation.isPending || publishPostMutation.isPending;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,17 +43,46 @@ export default function ComposePage() {
       return;
     }
 
-    setIsSubmitting(true);
+    try {
+      let videoId: bigint | undefined;
+      let videoContentType: string | undefined;
+      let videoFileName: string | undefined;
 
-    // Simulate API call - in real app this would call backend
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Upload video first if selected
+      if (selectedVideo) {
+        setUploadProgress(0);
+        videoId = await uploadVideoMutation.mutateAsync({
+          file: selectedVideo,
+          onProgress: (percentage) => setUploadProgress(percentage),
+        });
+        videoContentType = selectedVideo.type;
+        videoFileName = selectedVideo.name;
+      }
 
-    toast.success('Template posted successfully!', {
-      description: 'Your template is now live and visible to the community.',
-    });
+      // Parse tags
+      const tags = formData.tags
+        .split(',')
+        .map((tag) => tag.trim())
+        .filter((tag) => tag.length > 0);
 
-    setIsSubmitting(false);
-    navigate({ to: '/' });
+      // Publish the post
+      await publishPostMutation.mutateAsync({
+        title: formData.title,
+        description: formData.description,
+        templateLink: formData.templateLink,
+        tags,
+        previewImageUrl: formData.previewImageUrl || undefined,
+        videoId,
+        videoContentType,
+        videoFileName,
+      });
+
+      // Navigate back to feed
+      navigate({ to: '/' });
+    } catch (error) {
+      // Error toasts are handled by the mutations
+      console.error('Failed to create post:', error);
+    }
   };
 
   return (
@@ -71,6 +108,7 @@ export default function ComposePage() {
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 required
+                disabled={isSubmitting}
               />
             </div>
 
@@ -85,6 +123,7 @@ export default function ComposePage() {
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 rows={5}
                 required
+                disabled={isSubmitting}
               />
             </div>
 
@@ -98,6 +137,7 @@ export default function ComposePage() {
                 value={formData.templateLink}
                 onChange={(e) => setFormData({ ...formData, templateLink: e.target.value })}
                 required
+                disabled={isSubmitting}
               />
               <p className="text-xs text-muted-foreground">
                 The deep link that opens your template in Alight Motion
@@ -111,8 +151,11 @@ export default function ComposePage() {
                 placeholder="transitions, effects, professional (comma-separated)"
                 value={formData.tags}
                 onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+                disabled={isSubmitting}
               />
             </div>
+
+            <VideoUploadField onVideoSelect={setSelectedVideo} selectedVideo={selectedVideo} />
 
             <div className="space-y-2">
               <Label htmlFor="previewImageUrl">Preview Image URL</Label>
@@ -121,16 +164,41 @@ export default function ComposePage() {
                 placeholder="https://example.com/preview.jpg"
                 value={formData.previewImageUrl}
                 onChange={(e) => setFormData({ ...formData, previewImageUrl: e.target.value })}
+                disabled={isSubmitting}
               />
               <p className="text-xs text-muted-foreground">Optional: A preview image for your template</p>
             </div>
 
+            {uploadVideoMutation.isPending && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Uploading video...</span>
+                  <span className="font-medium">{uploadProgress}%</span>
+                </div>
+                <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+                  <div
+                    className="bg-primary h-full transition-all duration-300"
+                    style={{ width: `${uploadProgress}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
             <div className="flex gap-3 pt-4">
               <Button type="submit" disabled={isSubmitting} className="flex-1">
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Publish Template
+                {uploadVideoMutation.isPending
+                  ? 'Uploading Video...'
+                  : publishPostMutation.isPending
+                  ? 'Publishing...'
+                  : 'Publish Template'}
               </Button>
-              <Button type="button" variant="outline" onClick={() => navigate({ to: '/' })}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate({ to: '/' })}
+                disabled={isSubmitting}
+              >
                 Cancel
               </Button>
             </div>

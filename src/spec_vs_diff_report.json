@@ -1,61 +1,78 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T15:18:35.796Z",
-  "summary": "Frontend adds an /admin route, admin-related React Query hooks, and a profile-menu entry gated by an isCallerAdmin query. Backend adds a new optional customization settings field with a migration stub, but the diff summary does not show the required backend admin-login/logout APIs nor the read/write customization settings APIs, and the AdminPage UI is truncated before showing the actual settings editor/logout controls.",
+  "generatedAt": "2026-02-09T16:12:34.567Z",
+  "summary": "Video upload UI components and frontend types were added, plus backend methods/types for storing video metadata using ExternalBlob. However, several BuildRequest requirements are not fully met: the post data model is not actually extended/used end-to-end, backend serving returns metadata rather than bytes/chunks, backend auth and max-size enforcement are missing, React Query publish flow appears to be mock/in-memory rather than backend-backed with confirmed invalidation/toasts, and no stable-state migration changes are shown.",
   "missing_requirements": [
     {
-      "id": "REQ-13",
-      "requirement": "Backend support for credential-based admin login/logout using exact credentials and granting/revoking admin permissions for the caller principal; invalid credentials must fail; existing admin-only ops must accept newly logged-in admins.",
-      "reason": "Frontend calls actor.loginAdmin/actor.logoutAdmin/actor.isCallerAdmin, but the diff summary for backend/main.mo does not show any corresponding methods or the credential check/grant/revoke logic being implemented.",
+      "id": "REQ-22",
+      "requirement": "Extend the post data model to support an optional uploaded video attachment on posts (backend + frontend) so existing non-video posts still render.",
+      "reason": "Frontend TemplatePost was extended with optional video fields, but the backend post data model is not shown being extended (no post type/storage changes are evidenced). The implementation also appears to rely on mock/in-memory posts rather than a backend post model.",
       "evidence": [
-        "frontend/src/hooks/useAdmin.ts",
-        "backend/main.mo (truncated; no loginAdmin/logoutAdmin/isCallerAdmin shown)"
+        "frontend/src/types/post.ts",
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/hooks/useTemplatePosts.ts",
+        "backend/main.mo"
       ]
     },
     {
-      "id": "REQ-14",
-      "requirement": "Backend APIs and persistent state for app customization settings: typed settings with defaults; public query fetch; admin-only update that denies non-admin; persistence across upgrades.",
-      "reason": "State/migration for appCustomizationSettings exists, but the diff summary does not show any public query API (e.g., getCustomizationSettings) or admin-only update API (e.g., saveCustomizationSettings), nor any admin gating around such updates.",
+      "id": "REQ-23",
+      "requirement": "Backend APIs to accept a video upload from an authenticated user and serve the uploaded video bytes (or chunk) and content type by video id; enforce max upload size with user-safe error; reject unauthorized callers using existing auth approach.",
+      "reason": "Upload exists and checks user permission, but there is no maximum upload size enforcement in the backend, and the query method getVideoFile does not enforce authorization. Additionally, getVideoFile returns a VideoFile record with an ExternalBlob rather than explicitly returning bytes/chunks + content type as required.",
       "evidence": [
-        "backend/main.mo (adds var appCustomizationSettings : ?CustomizationSettings = null; but no APIs shown in truncated excerpt)",
-        "backend/migration_types.mo",
-        "backend/migration.mo",
-        "frontend/src/hooks/useCustomizationSettings.ts (calls actor.getCustomizationSettings() and actor.saveCustomizationSettings())"
+        "backend/main.mo"
       ]
     },
     {
-      "id": "REQ-16",
-      "requirement": "Admin Panel UI to view/update AppSettings with React Query + English toasts; editable fields; saving triggers mutation; success refreshes query; failure shows error and does not indicate success.",
-      "reason": "React Query hooks and toasts exist, but the AdminPage content is truncated before showing the settings edit form, save action wiring, and the authorized/unauthorized handling on the UI side.",
+      "id": "REQ-26",
+      "requirement": "Add/extend React Query hooks/mutations for (1) uploading a video and (2) publishing a post with the returned video reference; on success show English success toast, navigate back to feed, and invalidate/refetch feed; on failure show English error toast and recover UI.",
+      "reason": "An upload mutation exists and shows English error toasts. The publish mutation appears to create a mock post locally (comment says backend has no post storage yet) rather than calling a backend API. The onSuccess portion is truncated, so feed invalidation/refetch and success toast cannot be confirmed from the diff summary.",
       "evidence": [
-        "frontend/src/hooks/useCustomizationSettings.ts",
-        "frontend/src/pages/AdminPage.tsx (truncated before showing admin panel contents/customization controls)"
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/hooks/useTemplatePosts.ts",
+        "frontend/src/pages/ComposePage.tsx"
+      ]
+    },
+    {
+      "id": "REQ-27",
+      "requirement": "If new persisted backend state for videos changes stable state shape, add conditional migration so upgrades preserve existing data (update backend/migration_types.mo and migration.mo if required).",
+      "reason": "Diff shows new in-memory videoFiles map and counter in backend/main.mo, but no evidence of stable state shape updates or any migration files being added/modified.",
+      "evidence": [
+        "backend/main.mo"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Customization settings are implemented as theme/primaryColor/logoUrl under the name CustomizationSettings/appCustomizationSettings instead of an AppSettings record with suggested fields like display name/tagline.",
-      "reason": "The BuildRequest asks for a typed AppSettings record (example fields: app display name and tagline). The diff introduces a different settings shape and naming without any evidence of display name/tagline fields.",
+      "description": "Frontend feed/post system continues to use mock data and in-memory createdPosts/addTemplatePost rather than backend post storage/APIs.",
+      "reason": "BuildRequest is about adding video upload/attachment support to posts; the diff introduces/retains a demo/mock post storage approach (explicitly noted in code comments) which is not requested as part of the feature requirements.",
       "evidence": [
-        "backend/main.mo",
-        "backend/migration_types.mo",
-        "frontend/src/hooks/useCustomizationSettings.ts"
+        "frontend/src/hooks/useTemplatePosts.ts",
+        "frontend/src/hooks/useQueries.ts"
+      ]
+    },
+    {
+      "description": "Backend VideoFile includes an extra templateId field (set to 0) not described in requirements.",
+      "reason": "Requirements ask for an optional video reference and basic metadata (e.g., content type). Introducing templateId on the stored video record is additional behavior/data not requested in the BuildRequest.",
+      "evidence": [
+        "backend/main.mo"
       ]
     }
   ],
   "confidence": 0.74,
   "changed_files": [
     "backend/main.mo",
-    "backend/migration.mo",
-    "backend/migration_types.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/App.tsx",
-    "frontend/src/components/ProfileMenu.tsx",
-    "frontend/src/hooks/useAdmin.ts",
-    "frontend/src/hooks/useCustomizationSettings.ts",
-    "frontend/src/pages/AdminPage.tsx",
+    "frontend/src/components/PostCard.tsx",
+    "frontend/src/components/PostVideo.tsx",
+    "frontend/src/components/VideoUploadField.tsx",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/hooks/useTemplatePosts.ts",
+    "frontend/src/hooks/useVideoFile.ts",
+    "frontend/src/pages/ComposePage.tsx",
+    "frontend/src/pages/FeedPage.tsx",
+    "frontend/src/pages/PostDetailPage.tsx",
+    "frontend/src/types/post.ts",
     "project_state.json"
   ]
 }

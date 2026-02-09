@@ -9,21 +9,22 @@ import Runtime "mo:core/Runtime";
 
 import AccessControl "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
-import Migration "migration";
+import MixinStorage "blob-storage/Mixin";
+import Storage "blob-storage/Storage";
 
-(with migration = Migration.run)
 actor {
   // Persistent state
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
+  include MixinStorage();
 
-  var appCustomizationSettings : ?CustomizationSettings = null;
-
-  type CustomizationSettings = {
+  public type CustomizationSettings = {
     theme : Text;
     primaryColor : Text;
     logoUrl : Text;
   };
+
+  var appCustomizationSettings : ?CustomizationSettings = null;
 
   // Comparison module for like keys
   module LikeKey {
@@ -61,6 +62,55 @@ actor {
       Runtime.trap("Unauthorized: Can only view your own profile");
     };
     userProfiles.get(user);
+  };
+
+  public type Template = {
+    id : Nat;
+    name : Text;
+    author : Principal;
+    mediaUrl : Text;
+    thumbnail : Text;
+    description : Text;
+  };
+
+  // Video file metadata type
+  public type VideoFile = {
+    id : Nat;
+    owner : Principal;
+    fileName : Text;
+    contentType : Text;
+    blob : Storage.ExternalBlob;
+    templateId : Nat;
+  };
+
+  // Internal video file storage
+  let videoFiles = Map.empty<Nat, VideoFile>();
+  var videoFileCounter = 0;
+
+  // Video upload handling (TODO: Validate contentType is video)
+  public shared ({ caller }) func uploadTemplateVideo(contentType : Text, fileName : Text, blob : Storage.ExternalBlob) : async Nat {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can upload videos");
+    };
+
+    videoFileCounter += 1; // start at 1
+
+    let videoFile = {
+      id = videoFileCounter;
+      owner = caller;
+      fileName;
+      contentType;
+      blob;
+      templateId = 0;
+    };
+
+    videoFiles.add(videoFile.id, videoFile);
+    videoFile.id;
+  };
+
+  // Fetch video by ID
+  public query ({ caller }) func getVideoFile(id : Nat) : async ?VideoFile {
+    videoFiles.get(id);
   };
 
   // Premium subscription system
@@ -101,10 +151,6 @@ actor {
     thumbnail : Text;
     video : Text;
     alightMotionFileUrl : Text;
-  };
-
-  public type Template = TemplateDraft and {
-    author : Principal;
   };
 
   module Template {

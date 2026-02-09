@@ -2,12 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-a-new-admin-panel-route-in-the-react-app-e-g-admin-that-provides-an-admin-login-screen-using-the-provided-username-password-and-clearly-indicates-whether-the-current-authenticated-user-has-admin-access",
-      "featureTitle": "Add a new Admin Panel route in the React app (e.g., /admin) that provides an admin login screen using the provided username/password and clearly indicates whether the current authenticated user has admin access.",
+      "featureId": "feature-extend-the-post-data-model-to-support-an-optional-uploaded-video-with-audio-attachment-so-a-post-can-include-either-an-image-preview-url-and-or-a-playable-video",
+      "featureTitle": "Extend the post data model to support an optional uploaded video (with audio) attachment, so a post can include either an image preview URL and/or a playable video.",
       "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/hooks/useAdmin.ts",
-        "frontend/src/pages/AdminPage.tsx"
+        "frontend/src/pages/FeedPage.tsx",
+        "frontend/src/types/post.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -15,19 +14,21 @@
         "shadcn-ui@1.0.0",
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-15"
+        "REQ-22"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-build-the-admin-panel-ui-to-view-and-update-the-application-customization-settings-stored-in-the-backend-using-react-query-for-fetching-and-mutations-with-english-toast-notifications-for-success-and-failure",
-      "featureTitle": "Build the Admin Panel UI to view and update the application customization settings stored in the backend, using React Query for fetching and mutations, with English toast notifications for success and failure.",
+      "featureId": "feature-update-the-compose-page-to-include-a-video-upload-option-that-lets-a-signed-in-user-select-a-video-file-with-audio-preview-it-before-posting-and-publish-the-post-with-the-uploaded-video-attached",
+      "featureTitle": "Update the Compose page to include a \"Video\" upload option that lets a signed-in user select a video file (with audio), preview it before posting, and publish the post with the uploaded video attached.",
       "files": [
-        "frontend/src/hooks/useCustomizationSettings.ts",
-        "frontend/src/pages/AdminPage.tsx"
+        "frontend/src/components/VideoUploadField.tsx",
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/pages/ComposePage.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -35,19 +36,22 @@
         "shadcn-ui@1.0.0",
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-16"
+        "REQ-24"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-expose-an-entry-point-to-the-admin-panel-in-the-authenticated-ui-visible-only-when-the-current-user-has-admin-access",
-      "featureTitle": "Expose an entry point to the Admin Panel in the authenticated UI, visible only when the current user has admin access.",
+      "featureId": "feature-render-video-attachments-in-the-feed-post-card-and-post-detail-page-so-users-can-play-videos-with-sound-when-a-post-includes-a-video-attachment",
+      "featureTitle": "Render video attachments in the feed post card and post detail page so users can play videos with sound when a post includes a video attachment.",
       "files": [
-        "frontend/src/components/ProfileMenu.tsx",
-        "frontend/src/hooks/useAdmin.ts"
+        "frontend/src/components/PostCard.tsx",
+        "frontend/src/components/PostVideo.tsx",
+        "frontend/src/hooks/useVideoFile.ts",
+        "frontend/src/pages/PostDetailPage.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -55,10 +59,34 @@
         "shadcn-ui@1.0.0",
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-17"
+        "REQ-25"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-extend-react-query-hooks-and-mutations-to-support-creating-posts-that-include-an-uploaded-video-reference-and-ensure-the-feed-refreshes-after-publishing",
+      "featureTitle": "Add/extend React Query hooks and mutations to support creating posts that include an uploaded video reference, and ensure the feed refreshes after publishing.",
+      "files": [
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/hooks/useTemplatePosts.ts",
+        "frontend/src/pages/ComposePage.tsx",
+        "frontend/src/pages/FeedPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-26"
       ],
       "confidence": "high"
     }

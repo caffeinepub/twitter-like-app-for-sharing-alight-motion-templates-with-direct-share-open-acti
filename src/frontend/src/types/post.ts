@@ -12,4 +12,7 @@ export interface TemplatePost {
   isReposted: boolean;
   tags?: string[];
   previewImageUrl?: string;
+  videoId?: bigint;
+  videoContentType?: string;
+  videoFileName?: string;
 }

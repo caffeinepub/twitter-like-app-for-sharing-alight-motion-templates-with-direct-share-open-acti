@@ -1,76 +1,113 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Admin Panel route with admin login and customization settings UI (frontend only)",
+  "title": "Video (with sound) attachments for template posts (frontend)",
   "requirements": [
     {
-      "id": "REQ-15",
-      "summary": "Add a new /admin route with an Internet Identity sign-in CTA, credential-based admin login form, and clear admin-access status display.",
+      "id": "REQ-22",
+      "summary": "Update frontend post types to represent an optional video attachment in a backward-compatible way.",
       "acceptanceCriteria": [
-        "A new /admin route exists and is registered in the TanStack Router route tree.",
-        "If the user is not authenticated with Internet Identity, the /admin page shows a sign-in call-to-action (English text) and blocks admin actions.",
-        "If the user is authenticated but not an admin, the /admin page shows a login form that asks for username and password and calls the backend admin-login API.",
-        "If the user is authenticated and is an admin, the /admin page shows the admin panel contents (customization controls) and an admin logout control.",
-        "All user-facing text shown on the admin page is in English."
+        "Frontend `TemplatePost` type is updated to represent the optional video attachment in a backward-compatible way (existing non-video posts still render)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/AdminPage.tsx",
-          "operation": "create",
-          "description": "Create the Admin Panel page UI for /admin. Use the authorization component’s frontend guidance (role-based access control patterns) to drive the authenticated vs non-authenticated vs admin vs non-admin states; Verify the component's usage instructions before implementing. Show English sign-in CTA when not authenticated, show credential login form when authenticated but not admin, and show admin content + logout control when admin."
-        },
-        {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/src/types/post.ts",
           "operation": "modify",
-          "description": "Register the new /admin route in the TanStack Router route tree and wire it to the new AdminPage so navigation works without manual URL editing."
+          "description": "Extend `TemplatePost` to include an optional video attachment reference (e.g., `videoId?: bigint` plus optional metadata like `videoContentType?`, `videoFileName?`) while keeping `previewImageUrl?` intact for existing posts."
         },
         {
-          "path": "frontend/src/hooks/useAdmin.ts",
-          "operation": "create",
-          "description": "Add React Query hooks for admin access state and admin auth actions. Use the authorization component’s frontend guidance for handling authenticated principals and authorization failures gracefully; Verify the component's usage instructions before implementing. Include: (1) is-caller-admin query (authenticated-only), (2) admin login mutation calling loginAdmin(username,password), (3) admin logout mutation calling logoutAdmin(), with appropriate cache invalidation."
+          "path": "frontend/src/pages/FeedPage.tsx",
+          "operation": "modify",
+          "description": "Update the mock post objects to remain valid under the updated `TemplatePost` type (no behavior change for existing non-video posts)."
         }
       ]
     },
     {
-      "id": "REQ-16",
-      "summary": "Build Admin Panel controls to fetch and update customization settings using React Query, with English toast notifications for success/failure.",
+      "id": "REQ-24",
+      "summary": "Add a video file upload option on /compose with in-form preview and publish flow that uploads video first.",
       "acceptanceCriteria": [
-        "The admin panel loads current AppSettings via a React Query query and displays the current values in editable form fields.",
-        "Saving changes triggers a React Query mutation to the backend admin-only update API.",
-        "On successful save, a toast notification in English confirms the update and the settings query is refreshed/invalidated.",
-        "On failure (unauthorized or other errors), a toast notification in English explains the action failed and no UI state incorrectly indicates success."
+        "`/compose` includes a video file input option labeled in English (e.g., \"Video file\") alongside the existing fields.",
+        "When a user selects a video, the UI shows an in-form preview using an HTML5 `<video>` player with controls enabled (audio not forcibly muted).",
+        "Submitting the form uploads the video first (showing a loading state), then includes the returned video id/reference when creating the post.",
+        "If the user is not signed in, the existing sign-in gating behavior is preserved and user-facing messages are in English."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useCustomizationSettings.ts",
+          "path": "frontend/src/components/VideoUploadField.tsx",
           "operation": "create",
-          "description": "Create React Query hooks for customization settings: a query to fetch current settings (getCustomizationSettings) and a mutation to save changes (saveCustomizationSettings). Use the authorization component’s frontend guidance for handling authorization errors from backend traps; Verify the component's usage instructions before implementing. Ensure query invalidation/refetch after successful save."
+          "description": "Create a reusable compose-form field that accepts a video file (with audio), validates basic constraints client-side, and renders an in-form HTML5 `<video>` preview with controls enabled (not forcibly muted)."
         },
         {
-          "path": "frontend/src/pages/AdminPage.tsx",
+          "path": "frontend/src/pages/ComposePage.tsx",
           "operation": "modify",
-          "description": "Implement the editable customization form inside the admin-only view (e.g., theme, primaryColor, logoUrl). Wire it to the customization settings query/mutation via React Query. Add English toast notifications for save success and failure, and ensure failed saves do not leave the UI in an incorrect success state."
+          "description": "Integrate the new \"Video file\" input using `VideoUploadField`; on submit, preserve existing sign-in gating, show a loading state, upload the video first via the upload mutation, then publish the post including the returned video reference; ensure all user-facing text is English and the UI recovers on errors."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Use the blob-storage `ExternalBlob` capability (Verify the component's usage instructions before implementing.) to implement a React Query mutation for uploading the selected video file via the actor method, returning a stable video id for later association with a post."
         }
       ]
     },
     {
-      "id": "REQ-17",
-      "summary": "Expose an Admin Panel navigation entry in the authenticated profile dropdown, visible only to admins.",
+      "id": "REQ-25",
+      "summary": "Render playable video attachments (with sound) in PostCard and PostDetail while preserving existing non-video rendering.",
       "acceptanceCriteria": [
-        "When the current user is an admin, the profile dropdown includes a navigational item to /admin labeled in English (e.g., \"Admin Panel\").",
-        "When the current user is not an admin, the admin navigation item is not shown.",
-        "Navigation to /admin works and does not require manual URL editing to access."
+        "If a post has a video attachment, the PostCard renders a video preview/player (or a clear play affordance) instead of the static placeholder image.",
+        "The PostDetail page renders an HTML5 `<video>` player with controls enabled for video posts.",
+        "Non-video posts continue to render exactly as before (image URL if present, otherwise the existing placeholder)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/ProfileMenu.tsx",
-          "operation": "modify",
-          "description": "Add an admin-only dropdown item labeled in English (\"Admin Panel\") that navigates to /admin. Determine visibility using the is-caller-admin query hook. Use the authorization component’s frontend guidance for access-control UI patterns; Verify the component's usage instructions before implementing."
+          "path": "frontend/src/components/PostVideo.tsx",
+          "operation": "create",
+          "description": "Create a shared UI component that renders an HTML5 `<video>` player with controls enabled for a provided video reference; resolve a playable URL using the video query hook and fall back gracefully if unavailable."
         },
         {
-          "path": "frontend/src/hooks/useAdmin.ts",
+          "path": "frontend/src/hooks/useVideoFile.ts",
+          "operation": "create",
+          "description": "Add a React Query hook that fetches video metadata by id from the actor and derives a direct playable URL (using the returned blob reference). Use the blob-storage `ExternalBlob` capability to get a direct URL (Verify the component's usage instructions before implementing.)."
+        },
+        {
+          "path": "frontend/src/components/PostCard.tsx",
           "operation": "modify",
-          "description": "Ensure the admin-status query hook is reusable by ProfileMenu (including appropriate enabled conditions and safe defaults) and that its cache invalidates after admin login/logout so the dropdown visibility updates immediately; Verify the component's usage instructions before implementing."
+          "description": "If `post` includes a video reference, render `PostVideo` (or a clear play affordance) in place of the current static placeholder image block; otherwise keep existing image/placeholder rendering exactly as before."
+        },
+        {
+          "path": "frontend/src/pages/PostDetailPage.tsx",
+          "operation": "modify",
+          "description": "If the post includes a video reference, render `PostVideo` (controls enabled, audio allowed) instead of the image placeholder block; keep the existing non-video rendering behavior unchanged."
+        }
+      ]
+    },
+    {
+      "id": "REQ-26",
+      "summary": "Add React Query mutations/hooks for uploading videos and publishing posts with video references; navigate to feed with success/error toasts and refresh feed data.",
+      "acceptanceCriteria": [
+        "There are React Query mutations for (1) uploading a video and (2) creating/publishing the post with the returned video reference.",
+        "On successful publish, the user sees an English success toast and is navigated back to the feed, and the feed query is invalidated/refetched to include the new post.",
+        "On failure (upload or publish), the user sees an English error toast with a helpful message and the UI returns to a usable state (no stuck loading)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useTemplatePosts.ts",
+          "operation": "create",
+          "description": "Introduce a React Query-backed feed source (`templatePosts` query) so publishing can invalidate/refetch; initially back it with the existing mock data while supporting insertion of newly published posts (including optional video references)."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add a React Query mutation for publishing/creating a post that can include a video reference; on success show an English success toast, invalidate the feed query key used by `useTemplatePosts`, and allow callers to navigate back to the feed; on error show an English error toast and ensure loading state is cleared."
+        },
+        {
+          "path": "frontend/src/pages/FeedPage.tsx",
+          "operation": "modify",
+          "description": "Refactor feed rendering to use `useTemplatePosts` for its post list (instead of local component state) so invalidation/refetch after publishing updates the visible feed."
+        },
+        {
+          "path": "frontend/src/pages/ComposePage.tsx",
+          "operation": "modify",
+          "description": "Wire the upload + publish mutations together: upload selected video first (show loading), then publish the post with the returned video reference; on success toast + navigate to `/` and ensure the feed query is invalidated/refetched; on failure (either step) show an English error toast and return to a usable, non-loading state."
         }
       ]
     }

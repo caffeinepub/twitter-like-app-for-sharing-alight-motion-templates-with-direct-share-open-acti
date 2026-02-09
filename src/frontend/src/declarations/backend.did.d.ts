@@ -15,11 +15,46 @@ export interface CustomizationSettings {
   'primaryColor' : string,
   'logoUrl' : string,
 }
+export type ExternalBlob = Uint8Array;
 export interface UserProfile { 'username' : string, 'fullName' : string }
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
   { 'guest' : null };
+export interface VideoFile {
+  'id' : bigint,
+  'contentType' : string,
+  'owner' : Principal,
+  'templateId' : bigint,
+  'blob' : ExternalBlob,
+  'fileName' : string,
+}
+export interface _CaffeineStorageCreateCertificateResult {
+  'method' : string,
+  'blob_hash' : string,
+}
+export interface _CaffeineStorageRefillInformation {
+  'proposed_top_up_amount' : [] | [bigint],
+}
+export interface _CaffeineStorageRefillResult {
+  'success' : [] | [boolean],
+  'topped_up_amount' : [] | [bigint],
+}
 export interface _SERVICE {
+  '_caffeineStorageBlobIsLive' : ActorMethod<[Uint8Array], boolean>,
+  '_caffeineStorageBlobsToDelete' : ActorMethod<[], Array<Uint8Array>>,
+  '_caffeineStorageConfirmBlobDeletion' : ActorMethod<
+    [Array<Uint8Array>],
+    undefined
+  >,
+  '_caffeineStorageCreateCertificate' : ActorMethod<
+    [string],
+    _CaffeineStorageCreateCertificateResult
+  >,
+  '_caffeineStorageRefillCashier' : ActorMethod<
+    [[] | [_CaffeineStorageRefillInformation]],
+    _CaffeineStorageRefillResult
+  >,
+  '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'cancelPremium' : ActorMethod<[], undefined>,
@@ -27,6 +62,7 @@ export interface _SERVICE {
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getCustomizationSettings' : ActorMethod<[], [] | [CustomizationSettings]>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
+  'getVideoFile' : ActorMethod<[bigint], [] | [VideoFile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'isCallerPremium' : ActorMethod<[], boolean>,
   'likeTemplatePost' : ActorMethod<[bigint], undefined>,
@@ -37,6 +73,7 @@ export interface _SERVICE {
   'saveCustomizationSettings' : ActorMethod<[CustomizationSettings], undefined>,
   'setUserPremium' : ActorMethod<[Principal], undefined>,
   'upgradeToPremium' : ActorMethod<[], undefined>,
+  'uploadTemplateVideo' : ActorMethod<[string, string, ExternalBlob], bigint>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

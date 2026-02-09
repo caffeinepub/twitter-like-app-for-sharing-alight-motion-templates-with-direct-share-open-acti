@@ -7,14 +7,29 @@ export interface None {
     __kind__: "None";
 }
 export type Option<T> = Some<T> | None;
-export interface UserProfile {
-    username: string;
-    fullName: string;
+export class ExternalBlob {
+    getBytes(): Promise<Uint8Array<ArrayBuffer>>;
+    getDirectURL(): string;
+    static fromURL(url: string): ExternalBlob;
+    static fromBytes(blob: Uint8Array<ArrayBuffer>): ExternalBlob;
+    withUploadProgress(onProgress: (percentage: number) => void): ExternalBlob;
+}
+export interface VideoFile {
+    id: bigint;
+    contentType: string;
+    owner: Principal;
+    templateId: bigint;
+    blob: ExternalBlob;
+    fileName: string;
 }
 export interface CustomizationSettings {
     theme: string;
     primaryColor: string;
     logoUrl: string;
+}
+export interface UserProfile {
+    username: string;
+    fullName: string;
 }
 export enum UserRole {
     admin = "admin",
@@ -28,6 +43,7 @@ export interface backendInterface {
     getCallerUserRole(): Promise<UserRole>;
     getCustomizationSettings(): Promise<CustomizationSettings | null>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
+    getVideoFile(id: bigint): Promise<VideoFile | null>;
     isCallerAdmin(): Promise<boolean>;
     isCallerPremium(): Promise<boolean>;
     likeTemplatePost(postId: bigint): Promise<void>;
@@ -38,4 +54,5 @@ export interface backendInterface {
     saveCustomizationSettings(customizationSettings: CustomizationSettings): Promise<void>;
     setUserPremium(user: Principal): Promise<void>;
     upgradeToPremium(): Promise<void>;
+    uploadTemplateVideo(contentType: string, fileName: string, blob: ExternalBlob): Promise<bigint>;
 }

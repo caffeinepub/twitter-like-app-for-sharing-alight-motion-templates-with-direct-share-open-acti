@@ -1,123 +1,139 @@
 {
   "kind": "build_request",
-  "title": "Add admin panel with credential-based admin login and app customization controls",
+  "title": "Add video (with sound) upload option for posts",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-13",
-      "text": "Add backend support for credential-based admin login using the provided credentials (username: sahil@123, password: 123@sahil), and grant/revoke admin permissions for the authenticated Internet Identity principal upon successful login/logout.",
+      "id": "REQ-22",
+      "text": "Extend the post data model to support an optional uploaded video (with audio) attachment, so a post can include either an image preview URL and/or a playable video.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Add a video option for uploading"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Backend types include an optional video reference for a post (e.g., video asset id and basic metadata like content type).",
+        "Frontend `TemplatePost` type is updated to represent the optional video attachment in a backward-compatible way (existing non-video posts still render)."
+      ]
+    },
+    {
+      "id": "REQ-23",
+      "text": "Implement backend APIs to accept a video upload from an authenticated user and to serve the uploaded video back to clients by id.",
       "target": "backend",
       "source": {
         "messageIds": [
-          "msg-4",
-          "msg-7"
+          "msg-1"
         ],
         "quotes": [
-          "Generate a admin panel for this application customisation, username sahil@123, password 123@sahil",
-          "123@sahil"
+          "Add a video option for uploading"
         ]
       },
       "acceptanceCriteria": [
-        "When an authenticated user calls the admin-login API with username \"sahil@123\" and password \"123@sahil\", the caller is granted admin permissions in the canister access control state.",
-        "When invalid credentials are provided, the call fails with an authorization error (no admin privileges granted).",
-        "An admin-logout API exists that removes/revokes admin permissions for the caller.",
-        "Existing admin-only operations (e.g., setUserPremium) accept the newly logged-in admin without requiring any URL secret token initialization."
+        "There is a shared (update) backend method that allows an authenticated user to upload a video file payload and returns a stable identifier for later retrieval.",
+        "There is a query backend method that returns the stored video bytes (or a chunk) and its content type when given a valid video id.",
+        "Unauthorized callers are rejected using the existing authorization approach (user role required).",
+        "The backend enforces a clear maximum upload size and returns a user-safe error on oversize uploads."
       ]
     },
     {
-      "id": "REQ-14",
-      "text": "Implement backend APIs and persistent state for application customization settings that are readable by all users but writable only by admins.",
+      "id": "REQ-24",
+      "text": "Update the Compose page to include a \"Video\" upload option that lets a signed-in user select a video file (with audio), preview it before posting, and publish the post with the uploaded video attached.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Add a video option for uploading"
+        ]
+      },
+      "acceptanceCriteria": [
+        "`/compose` includes a video file input option labeled in English (e.g., \"Video file\") alongside the existing fields.",
+        "When a user selects a video, the UI shows an in-form preview using an HTML5 `<video>` player with controls enabled (audio not forcibly muted).",
+        "Submitting the form uploads the video first (showing a loading state), then includes the returned video id/reference when creating the post.",
+        "If the user is not signed in, the existing sign-in gating behavior is preserved and user-facing messages are in English."
+      ]
+    },
+    {
+      "id": "REQ-25",
+      "text": "Render video attachments in the feed post card and post detail page so users can play videos with sound when a post includes a video attachment.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Add a video option for uploading"
+        ]
+      },
+      "acceptanceCriteria": [
+        "If a post has a video attachment, the PostCard renders a video preview/player (or a clear play affordance) instead of the static placeholder image.",
+        "The PostDetail page renders an HTML5 `<video>` player with controls enabled for video posts.",
+        "Non-video posts continue to render exactly as before (image URL if present, otherwise the existing placeholder)."
+      ]
+    },
+    {
+      "id": "REQ-26",
+      "text": "Add/extend React Query hooks and mutations to support creating posts that include an uploaded video reference, and ensure the feed refreshes after publishing.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Add a video option for uploading"
+        ]
+      },
+      "acceptanceCriteria": [
+        "There are React Query mutations for (1) uploading a video and (2) creating/publishing the post with the returned video reference.",
+        "On successful publish, the user sees an English success toast and is navigated back to the feed, and the feed query is invalidated/refetched to include the new post.",
+        "On failure (upload or publish), the user sees an English error toast with a helpful message and the UI returns to a usable state (no stuck loading)."
+      ]
+    },
+    {
+      "id": "REQ-27",
+      "text": "If adding new persisted backend state for videos changes the actor's stable state shape, add a conditional migration so existing deployments upgrade without losing data.",
       "target": "backend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-1"
         ],
         "quotes": [
-          "Generate a admin panel for this application customisation, username sahil@123, password 123@sahil"
+          "Add a video option for uploading"
         ]
       },
       "acceptanceCriteria": [
-        "A typed AppSettings record exists in the backend state (e.g., fields such as app display name and tagline), with sensible defaults so the app works before any admin edits.",
-        "A query API is available for the frontend to fetch current AppSettings without requiring authentication.",
-        "An admin-only update API is available to modify AppSettings, and it traps/denies callers without admin permissions.",
-        "Settings updates persist across canister upgrades using stable storage patterns already used by this project (add migration only if state shape changes require it)."
-      ]
-    },
-    {
-      "id": "REQ-15",
-      "text": "Add a new Admin Panel route in the React app (e.g., /admin) that provides an admin login screen using the provided username/password and clearly indicates whether the current authenticated user has admin access.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-4",
-          "msg-7"
-        ],
-        "quotes": [
-          "Generate a admin panel for this application customisation, username sahil@123, password 123@sahil",
-          "123@sahil"
-        ]
-      },
-      "acceptanceCriteria": [
-        "A new /admin route exists and is registered in the TanStack Router route tree.",
-        "If the user is not authenticated with Internet Identity, the /admin page shows a sign-in call-to-action (English text) and blocks admin actions.",
-        "If the user is authenticated but not an admin, the /admin page shows a login form that asks for username and password and calls the backend admin-login API.",
-        "If the user is authenticated and is an admin, the /admin page shows the admin panel contents (customization controls) and an admin logout control.",
-        "All user-facing text shown on the admin page is in English."
-      ]
-    },
-    {
-      "id": "REQ-16",
-      "text": "Build the Admin Panel UI to view and update the application customization settings stored in the backend, using React Query for fetching and mutations, with English toast notifications for success and failure.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "Generate a admin panel for this application customisation, username sahil@123, password 123@sahil"
-        ]
-      },
-      "acceptanceCriteria": [
-        "The admin panel loads current AppSettings via a React Query query and displays the current values in editable form fields.",
-        "Saving changes triggers a React Query mutation to the backend admin-only update API.",
-        "On successful save, a toast notification in English confirms the update and the settings query is refreshed/invalidated.",
-        "On failure (unauthorized or other errors), a toast notification in English explains the action failed and no UI state incorrectly indicates success."
-      ]
-    },
-    {
-      "id": "REQ-17",
-      "text": "Expose an entry point to the Admin Panel in the authenticated UI, visible only when the current user has admin access.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "Generate a admin panel for this application customisation, username sahil@123, password 123@sahil"
-        ]
-      },
-      "acceptanceCriteria": [
-        "When the current user is an admin, the profile dropdown includes a navigational item to /admin labeled in English (e.g., \"Admin Panel\").",
-        "When the current user is not an admin, the admin navigation item is not shown.",
-        "Navigation to /admin works and does not require manual URL editing to access."
+        "If stable state is used for post/video storage, `backend/migration_types.mo` is updated to include the new fields in `NewActor`.",
+        "A `backend/migration.mo` is added/updated only if required by the project’s migration policy, and existing state fields are preserved during upgrade."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single-actor Motoko canister (all logic in backend/main.mo).",
-    "Only generate backend/migration.mo changes if required to preserve existing stable state across upgrades (conditional migration policy).",
-    "Do not edit files in frontend immutablePaths (frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui).",
-    "Use English for all user-facing text (labels, buttons, toasts, empty states, errors).",
-    "Admin credentials must be exactly: username sahil@123, password 123@sahil."
+    "Backend must remain a single Motoko actor with all logic in `backend/main.mo`.",
+    "Do not edit any paths listed in `frontend.immutablePaths` (compose existing UI components instead).",
+    "Use English for all user-facing text (labels, buttons, toasts, errors)."
   ],
   "nonGoals": [
-    "Implementing third-party authentication providers (only Internet Identity is supported).",
-    "Adding real payment processing for Premium subscriptions.",
-    "Adding external databases or non-IC backend services.",
-    "Building a fully-featured CMS; limit customization to the explicit AppSettings stored in the canister plus admin access management."
+    "Integrating third-party video hosting/CDNs or external storage services.",
+    "Implementing real-time upload progress via sockets/WebSockets.",
+    "Advanced video transcoding, streaming manifests (HLS/DASH), or adaptive bitrate playback."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

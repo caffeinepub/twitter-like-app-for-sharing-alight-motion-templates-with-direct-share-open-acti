@@ -8,6 +8,17 @@
 
 import { IDL } from '@icp-sdk/core/candid';
 
+export const _CaffeineStorageCreateCertificateResult = IDL.Record({
+  'method' : IDL.Text,
+  'blob_hash' : IDL.Text,
+});
+export const _CaffeineStorageRefillInformation = IDL.Record({
+  'proposed_top_up_amount' : IDL.Opt(IDL.Nat),
+});
+export const _CaffeineStorageRefillResult = IDL.Record({
+  'success' : IDL.Opt(IDL.Bool),
+  'topped_up_amount' : IDL.Opt(IDL.Nat),
+});
 export const UserRole = IDL.Variant({
   'admin' : IDL.Null,
   'user' : IDL.Null,
@@ -22,8 +33,43 @@ export const CustomizationSettings = IDL.Record({
   'primaryColor' : IDL.Text,
   'logoUrl' : IDL.Text,
 });
+export const ExternalBlob = IDL.Vec(IDL.Nat8);
+export const VideoFile = IDL.Record({
+  'id' : IDL.Nat,
+  'contentType' : IDL.Text,
+  'owner' : IDL.Principal,
+  'templateId' : IDL.Nat,
+  'blob' : ExternalBlob,
+  'fileName' : IDL.Text,
+});
 
 export const idlService = IDL.Service({
+  '_caffeineStorageBlobIsLive' : IDL.Func(
+      [IDL.Vec(IDL.Nat8)],
+      [IDL.Bool],
+      ['query'],
+    ),
+  '_caffeineStorageBlobsToDelete' : IDL.Func(
+      [],
+      [IDL.Vec(IDL.Vec(IDL.Nat8))],
+      ['query'],
+    ),
+  '_caffeineStorageConfirmBlobDeletion' : IDL.Func(
+      [IDL.Vec(IDL.Vec(IDL.Nat8))],
+      [],
+      [],
+    ),
+  '_caffeineStorageCreateCertificate' : IDL.Func(
+      [IDL.Text],
+      [_CaffeineStorageCreateCertificateResult],
+      [],
+    ),
+  '_caffeineStorageRefillCashier' : IDL.Func(
+      [IDL.Opt(_CaffeineStorageRefillInformation)],
+      [_CaffeineStorageRefillResult],
+      [],
+    ),
+  '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'cancelPremium' : IDL.Func([], [], []),
@@ -39,6 +85,7 @@ export const idlService = IDL.Service({
       [IDL.Opt(UserProfile)],
       ['query'],
     ),
+  'getVideoFile' : IDL.Func([IDL.Nat], [IDL.Opt(VideoFile)], ['query']),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'isCallerPremium' : IDL.Func([], [IDL.Bool], ['query']),
   'likeTemplatePost' : IDL.Func([IDL.Nat], [], []),
@@ -49,11 +96,27 @@ export const idlService = IDL.Service({
   'saveCustomizationSettings' : IDL.Func([CustomizationSettings], [], []),
   'setUserPremium' : IDL.Func([IDL.Principal], [], []),
   'upgradeToPremium' : IDL.Func([], [], []),
+  'uploadTemplateVideo' : IDL.Func(
+      [IDL.Text, IDL.Text, ExternalBlob],
+      [IDL.Nat],
+      [],
+    ),
 });
 
 export const idlInitArgs = [];
 
 export const idlFactory = ({ IDL }) => {
+  const _CaffeineStorageCreateCertificateResult = IDL.Record({
+    'method' : IDL.Text,
+    'blob_hash' : IDL.Text,
+  });
+  const _CaffeineStorageRefillInformation = IDL.Record({
+    'proposed_top_up_amount' : IDL.Opt(IDL.Nat),
+  });
+  const _CaffeineStorageRefillResult = IDL.Record({
+    'success' : IDL.Opt(IDL.Bool),
+    'topped_up_amount' : IDL.Opt(IDL.Nat),
+  });
   const UserRole = IDL.Variant({
     'admin' : IDL.Null,
     'user' : IDL.Null,
@@ -68,8 +131,43 @@ export const idlFactory = ({ IDL }) => {
     'primaryColor' : IDL.Text,
     'logoUrl' : IDL.Text,
   });
+  const ExternalBlob = IDL.Vec(IDL.Nat8);
+  const VideoFile = IDL.Record({
+    'id' : IDL.Nat,
+    'contentType' : IDL.Text,
+    'owner' : IDL.Principal,
+    'templateId' : IDL.Nat,
+    'blob' : ExternalBlob,
+    'fileName' : IDL.Text,
+  });
   
   return IDL.Service({
+    '_caffeineStorageBlobIsLive' : IDL.Func(
+        [IDL.Vec(IDL.Nat8)],
+        [IDL.Bool],
+        ['query'],
+      ),
+    '_caffeineStorageBlobsToDelete' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Vec(IDL.Nat8))],
+        ['query'],
+      ),
+    '_caffeineStorageConfirmBlobDeletion' : IDL.Func(
+        [IDL.Vec(IDL.Vec(IDL.Nat8))],
+        [],
+        [],
+      ),
+    '_caffeineStorageCreateCertificate' : IDL.Func(
+        [IDL.Text],
+        [_CaffeineStorageCreateCertificateResult],
+        [],
+      ),
+    '_caffeineStorageRefillCashier' : IDL.Func(
+        [IDL.Opt(_CaffeineStorageRefillInformation)],
+        [_CaffeineStorageRefillResult],
+        [],
+      ),
+    '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'cancelPremium' : IDL.Func([], [], []),
@@ -85,6 +183,7 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Opt(UserProfile)],
         ['query'],
       ),
+    'getVideoFile' : IDL.Func([IDL.Nat], [IDL.Opt(VideoFile)], ['query']),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'isCallerPremium' : IDL.Func([], [IDL.Bool], ['query']),
     'likeTemplatePost' : IDL.Func([IDL.Nat], [], []),
@@ -95,6 +194,11 @@ export const idlFactory = ({ IDL }) => {
     'saveCustomizationSettings' : IDL.Func([CustomizationSettings], [], []),
     'setUserPremium' : IDL.Func([IDL.Principal], [], []),
     'upgradeToPremium' : IDL.Func([], [], []),
+    'uploadTemplateVideo' : IDL.Func(
+        [IDL.Text, IDL.Text, ExternalBlob],
+        [IDL.Nat],
+        [],
+      ),
   });
 };
 
